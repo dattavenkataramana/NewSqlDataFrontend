@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json()); 
 
-const dbPath = path.join(__dirname,"database.db");
+const dbPath = path.join(__dirname,"newdatabase.db");
 
 let db = null 
 
@@ -31,23 +31,27 @@ const initializeDbAndServer = async ()=>{
 
 initializeDbAndServer()
 
-app.get("/login1/", async (req, res) => {
+app.get("/login/", async (req, res) => {
   
-    const getQueryDatta = "SELECT * FROM  login1";
+    const getQueryDatta = "SELECT * FROM  login";
     const datas = await db.all(getQueryDatta);
 
     res.send(datas);
 });
 
-
-app.post('/login1/', async (req, res) => {
+app.post('/login/', async (req, res) => {
     try {
       const { name, password } = req.body;
-      const addData = `INSERT INTO login1(name, password) VALUES(?, ?)`;
-      await db.run(addData, [name, password]);
-      res.status(201).send('User added successfully!');
+      const query = 'INSERT INTO login(username, password) VALUES (?, ?)';
+      const result = await db.run(query, [username, password]);
+      if (result.lastID) {
+        res.status(200).send('Login successful!');
+      } else {
+        res.status(401).send('Failed to add user');
+      }
     } catch (error) {
-      console.error('Error adding user:', error);
-      res.status(500).send('Failed to add user!');
+      console.error('Error:', error);
+      res.status(500).send('Internal server error');
     }
   });
+  
